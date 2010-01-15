@@ -1,0 +1,90 @@
+# Fakturoid dryoto stack 
+task :variables do
+  execute "PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/ruby-enterprise/bin"
+end
+
+task :initial_update do
+  execute "aptitude safe-upgrade", "echo 'Started' > /dev/null"
+end
+
+package :common do
+  apt "build-essential"
+  apt "locales unzip logrotate"
+  apt "vim htop curl"
+end
+
+package :iptables do
+  apt "iptables"
+end
+
+package :imagemagick do
+  apt "imagemagick"
+end
+
+package :git do
+  apt "git-core"
+end
+
+package :postgresql do
+  apt "postgresql postgresql-client libpq-dev"
+end
+
+package :ruby do
+  depends :common
+  set :version, '1.8.7-20090610'
+  set :url,     "http://rubyforge.org/frs/download.php/66162/ruby-enterprise-1.8.7-2009.10.tar.gz"
+  apt "zlib1g-dev libreadline5-dev libssl-dev"
+  source :download_url => get(:url), 
+         :custom_install => "./installer --auto=/opt/ruby-enterprise"
+  verify do
+    has_file "/opt/ruby-enterprise/bin/ruby"
+  end
+end
+
+package :nginx do
+  gem "passenger"
+  execute "passenger-install-nginx-module --auto --auto-download --extra-configure-flags=none --prefix=/opt/nginx"
+  # add nginx.conf 
+  # add init script
+  # update-rc.d nginx defaults
+  verify do
+    has_file "/opt/nginx/sbin/nginx"
+  end
+end
+
+package :gems do
+  gem "gemcutter"
+  #execute "/opt/ruby-enterprise/bin/gem tumble"
+end
+
+task :ssh do
+  # configure SSH server here
+  # 
+end
+
+task :webdir do
+  set :dir, "/home/web"
+  execute "mkdir -p #{get :dir} && chmod 770 #{get :dir} && chown www-data:www-data #{get :dir}"
+end
+
+task :appuser do
+  set :user,   "your-app"
+  set :groups, ["www-data"]
+  
+  execute "/usr/sbin/useradd #{get :user} --groups #{get(:groups).join(' ')}"
+  #execute "mkdir /home/your-app/.ssh; chown your-app:www-data /home/your-app/.ssh; chmod 700 /home/your-app/.ssh"
+  #execute "su - #{get :user} -c 'ssh-keygen"
+end
+
+task :db do
+  set :dbuser, "your-app"
+  set :dbname, "your-app"
+  set :dbpass, "..."
+  
+  execute "su - postgres -c 'createuser -S -d -R #{get :dbuser}'"
+  execute "su - postgres -c 'psql -c \"ALTER USER #{get :dbuser} WITH PASSWORD '\\''#{get :dbpass}'\\''\"'"
+  execute "su - postgres -c 'createdb -O #{get :dbuser} #{get :dbname}'"
+end
+
+# dpkg-reconfigure tzdata
+# dpkg-reconfigure locales

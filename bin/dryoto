@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+# Dryoto bin
+
+require "lib/dryoto" 
+
+if ARGV.size.zero?
+  puts "You need to specify at least one param.\ndryoto usage:\n  #{__FILE__} rules_file.rb"
+  exit 1
+end
+
+output = :bash
+if ARGV.size == 2
+  output = :tree if ARGV.first == "--tree"
+  output = :bash if ARGV.first == "--bash"
+end
+puts Dryoto.run(:file => ARGV.last, :output => output)
