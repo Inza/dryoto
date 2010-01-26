@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 # Dryoto bin
 
-require "lib/dryoto" 
+require "../lib/dryoto.rb" 
 
 if ARGV.size.zero?
-  puts "You need to specify at least one param.\ndryoto usage:\n  #{__FILE__} rules_file.rb"
+  puts "You need to specify at least one param.\ndryoto usage:\n  #{__FILE__} <filename.dry>"
   exit 1
 end
 

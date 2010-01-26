@@ -1,8 +1,8 @@
 # Dryoto libraries
-require "lib/rule"
+require "../lib/rule"
 Dir[File.dirname(__FILE__) + '/rules/*/*.rb'].each { |r| require r }
-require "lib/processor"
-require "lib/verify"
+require "../lib/processor"
+require "../lib/verify"
 
 # DSL modules reside in Rule namespace
 class Object
